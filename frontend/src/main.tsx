@@ -1,10 +1,12 @@
 import {StrictMode} from 'react'
 import './index.css'
-import FilmsProvider from "@/shared/store/films.store.tsx";
 import {getFilms} from "@/shared/api/films.api.ts";
 import ReactDOM from 'react-dom/client';
 import {createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen.ts";
+import FilmsProvider from "@/shared/providers/films.provider.tsx";
+import {AuthProvider} from "@/shared/providers/auth.provider.tsx";
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 const router = createRouter({
 	routeTree,
@@ -31,6 +33,7 @@ declare module '@tanstack/react-router' {
         router: typeof router
     }
 }
+const queryClient = new QueryClient()
 
 const rootElement = document.getElementById('root')!
 
@@ -38,10 +41,13 @@ if (!rootElement?.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement)
 	root.render(
 		<StrictMode>
-			<FilmsProvider initialFilms={getFilms()} >
-				<RouterProvider router={router} />
-			</FilmsProvider>
+			<QueryClientProvider client={queryClient}>
+				<AuthProvider>
+					<FilmsProvider initialFilms={getFilms()}>
+						<RouterProvider router={router} />
+					</FilmsProvider>
+				</AuthProvider>
+			</QueryClientProvider>
 		</StrictMode>
-
 	)
 }

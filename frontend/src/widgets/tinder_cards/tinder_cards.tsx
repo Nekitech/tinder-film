@@ -4,7 +4,7 @@ import CardCustom from "@/features/card_custom/card_custom.tsx";
 import {easeOutExpo} from "@/shared/lib/easings.data.ts";
 import {CardSwipeDirection, IsDragOffBoundary} from "@/shared/types/cards.type.ts";
 import GameActionBtn from "@/features/card_custom/card_actions_btn.tsx";
-import {useFilmsContext} from "@/shared/store/films.store.tsx";
+import {useFilmsContext} from "@/shared/providers/films.provider.tsx";
 import {AnimatePresence, motion} from "framer-motion";
 // import { BgPattern } from "@/components/ui";
 
@@ -42,13 +42,13 @@ const TinderCards = () => {
 			opacity: 1,
 			y: 0,
 			scale: 1,
-			transition: { duration: 0.3, ease: easeOutExpo },
+			transition: {duration: 0.3, ease: easeOutExpo},
 		},
 		upcoming: {
 			opacity: 0.5,
 			y: 67,
 			scale: 0.9,
-			transition: { duration: 0.3, ease: easeOutExpo, delay: 0 },
+			transition: {duration: 0.3, ease: easeOutExpo, delay: 0},
 		},
 		remainings: {
 			opacity: 0,
@@ -60,7 +60,7 @@ const TinderCards = () => {
 			x: direction === "left" ? -300 : 300,
 			y: 40,
 			rotate: direction === "left" ? -20 : 20,
-			transition: { duration: 0.3, ease: easeOutExpo },
+			transition: {duration: 0.3, ease: easeOutExpo},
 		},
 	};
 
@@ -69,7 +69,7 @@ const TinderCards = () => {
 			className={`flex p-5 min-h-screen h-full flex-col justify-center items-center overflow-hidden  ${
 				isDragging ? "cursor-grabbing" : ""
 			}`}
-			style={{ backgroundColor: cardDrivenProps.mainBgColor }}
+			style={{backgroundColor: cardDrivenProps.mainBgColor}}
 		>
 			<div
 				id="gameUIWrapper"
@@ -80,7 +80,7 @@ const TinderCards = () => {
 					className="w-full aspect-[100/150] max-w-xs mb-[20px] relative z-10"
 				>
 					<AnimatePresence>
-						{films.map((card, i) => {
+						{ films.map((card, i) => {
 							const isLast = i === films.length - 1;
 							const isUpcoming = i === films.length - 2;
 							return (
@@ -107,7 +107,7 @@ const TinderCards = () => {
 									/>
 								</motion.div>
 							);
-						})}
+						}) }
 					</AnimatePresence>
 				</div>
 				<div

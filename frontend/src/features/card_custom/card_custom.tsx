@@ -75,24 +75,24 @@ const CardCustom = ({
 					x: drivenX,
 				}}
 			>
-				<p className={'text-green-900'}>{data.description}</p>
+				<p className={'text-green-900'}>{ data.description }</p>
 
 				<div
 					id="illustration"
 					className="w-full mx-auto max-w-[250px] aspect-square rounded-full relative"
 				>
-					{/*<div*/}
-					{/*    id="imgPlaceholder"*/}
-					{/*    className="bg-gameSwipe-neutral absolute object-cover w-full h-full"*/}
-					{/*    style={{*/}
-					{/*        maskImage: `url('/images/gamecard-image-mask.png')`,*/}
-					{/*        WebkitMaskImage: `url(/images/gamecard-image-mask.png)`,*/}
-					{/*        maskSize: "contain",*/}
-					{/*        WebkitMaskSize: "contain",*/}
-					{/*        maskRepeat: "no-repeat",*/}
-					{/*        WebkitMaskRepeat: "no-repeat",*/}
-					{/*    }}*/}
-					{/*></div>*/}
+					{ /*<div*/ }
+					{ /*    id="imgPlaceholder"*/ }
+					{ /*    className="bg-gameSwipe-neutral absolute object-cover w-full h-full"*/ }
+					{ /*    style={{*/ }
+					{ /*        maskImage: `url('/images/gamecard-image-mask.png')`,*/ }
+					{ /*        WebkitMaskImage: `url(/images/gamecard-image-mask.png)`,*/ }
+					{ /*        maskSize: "contain",*/ }
+					{ /*        WebkitMaskSize: "contain",*/ }
+					{ /*        maskRepeat: "no-repeat",*/ }
+					{ /*        WebkitMaskRepeat: "no-repeat",*/ }
+					{ /*    }}*/ }
+					{ /*></div>*/ }
 				</div>
 			</motion.div>
 
@@ -130,7 +130,7 @@ const CardCustom = ({
 					}
 				}}
 				style={{x}}
-			></motion.div>
+			/>
 		</>
 	);
 };

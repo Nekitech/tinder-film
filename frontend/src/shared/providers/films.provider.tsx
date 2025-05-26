@@ -5,14 +5,18 @@ const useFilmState = (initialFilms: Film[]) => useState<Film[]>(initialFilms);
 export const FilmsContext = createContext<ReturnType<typeof useFilmState> | null>(null);
 
 export const FilmsProvider = (
-	{ initialFilms,
-		children }:
-    { initialFilms: Film[],
-        children: ReactNode }) => {
+	{
+		initialFilms,
+		children
+	}:
+    {
+        initialFilms: Film[],
+        children: ReactNode
+    }) => {
 	const [films, setFilms] = useFilmState(initialFilms)
 	return (
 		<FilmsContext.Provider value={[films, setFilms]}>
-			{children}
+			{ children }
 		</FilmsContext.Provider>
 	);
 };

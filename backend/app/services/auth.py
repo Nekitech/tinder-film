@@ -49,7 +49,7 @@ class AuthService:
         creds.refresh_token = refresh_token
         await self.db.commit()
 
-        return creds.access_token, creds.refresh_token
+        return creds.access_token
 
     async def refresh_access_token(self, refresh_token: RequestToken) -> str:
         # Проверка refresh_token

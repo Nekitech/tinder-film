@@ -6,5 +6,5 @@ export const Route = createFileRoute('/(app)/app/recommendations')({
 })
 
 function RouteComponent() {
-	return <TinderCards/>
+	return <TinderCards />
 }
