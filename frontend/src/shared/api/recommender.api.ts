@@ -1,4 +1,6 @@
-import {Film} from "@/shared/types/films.type.ts";
+import {
+	useRecommendRecommenderRecommendationsUserIdGet
+} from "@/shared/api/generated/recommender-system/recommender-system.ts";
 
 export const films = [
 	{
@@ -21,4 +23,6 @@ export const films = [
 	}
 ]
 
-export const getFilms =  (): Film[] => films;
+export const $recommender_api = {
+	getRecommendationsByUserId: () => useRecommendRecommenderRecommendationsUserIdGet
+}

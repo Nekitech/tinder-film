@@ -2,6 +2,15 @@ import os
 import pickle
 from typing import Any
 
+import numpy as np
+from implicit.als import AlternatingLeastSquares
+from surprise import AlgoBase
+from surprise.dump import dump, load
+
+
+def save_surprise_model(model: AlgoBase, path: str):
+    dump(path, algo=model)
+
 
 class ModelStorage:
     def __init__(self, path: str):
@@ -39,3 +48,17 @@ class ModelStorage:
         if self.exists():
             os.remove(self.path)
             print(f"🗑️ Модель удалена: {self.path}")
+
+    def load_surprise_model(self, path: str) -> AlgoBase:
+        _, model = load(path)
+        return model
+
+    def save_implicit_model(self, model: AlternatingLeastSquares, path: str):
+        np.savez(path, user_factors=model.user_factors, item_factors=model.item_factors)
+
+    def load_implicit_model(self, path: str) -> AlternatingLeastSquares:
+        model = AlternatingLeastSquares(factors=50)
+        data = np.load(path)
+        model.user_factors = data["user_factors"]
+        model.item_factors = data["item_factors"]
+        return model

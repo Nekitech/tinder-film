@@ -8,10 +8,8 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: tinder-film
+    env_file:
+      - .env
 
 volumes:
   postgres_data:

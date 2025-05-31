@@ -7,16 +7,21 @@ import {IsDragOffBoundary} from "@/shared/types/cards.type.ts";
 const actionPropsMatrix = {
 	left: {
 		ariaLabel: "Swipe Left",
-		bgColorClass: "bg-answer-bad",
+		bgColorClass: "bg-accent-red",
 		icon: SvgIconAnswerBad,
 		iconBaseColorClass: "text-[#701823]",
 	},
 	right: {
 		ariaLabel: "Swipe Right",
-		bgColorClass: "bg-answer-good",
+		bgColorClass: "bg-accent-green",
 		icon: SvgIconAnswerGood,
 		iconBaseColorClass: "text-[#2C5B10]",
 	},
+};
+
+const shadowStyles = {
+	left: `shadow-[0_0_30px_var(--color-accent-red),0_0_60px_var(--color-accent-red)]`,
+	right: `shadow-[0_0_30px_var(--color-accent-green),0_0_60px_var(--color-accent-green)]`,
 };
 
 type Props = {
@@ -36,10 +41,13 @@ const GameActionBtn = ({
 	const icon_element = actionPropsMatrix[direction!].icon;
 
 	return (
-		<motion.button onClick={onClick} whileTap={{ scale: 0.9 }}>
+		<motion.button onClick={onClick} whileTap={{scale: 0.9}}>
 			<motion.div
-				className={`cursor-pointer flex items-center justify-center w-[60px] h-[60px] rounded-full ${actionPropsMatrix[direction].bgColorClass} shadow`}
-				style={{ scale: scale }}
+				className={`cursor-pointer flex items-center \
+				justify-center w-[60px] h-[60px] rounded-full ${actionPropsMatrix[direction].bgColorClass} 
+				opacity-90
+            	${shadowStyles[direction]}`}
+				style={{scale: scale}}
 			>
 				<img
 					alt={'icon'}

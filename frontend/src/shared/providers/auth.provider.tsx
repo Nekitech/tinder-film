@@ -1,11 +1,12 @@
 import {createContext, FC, useContext, useEffect, useState} from "react";
-import {useGetAccessTokenFromCookieTokenGet, useLoginLoginPost} from "@/shared/api/generated/auth/auth.ts";
+import {$user_api} from "@/shared/api/user.api.ts";
+import {LoginResponse} from "@/shared/api/generated/fastAPI.schemas.ts";
 
 
 type AuthContextType = {
     isAuthenticated: boolean
     accessToken: string | null
-    login: (username: string, password: string) => Promise<void>
+    login: (username: string, password: string) => Promise<LoginResponse | undefined>
     logout: () => void
     refreshToken?: () => Promise<void>
 }
@@ -24,22 +25,21 @@ export const useAuth = () => {
 
 export const AuthProvider: FC<{ children: React.ReactNode }> = ({children}) => {
 	const [accessToken, setAccessToken] = useState<string | null>(null)
-	const {data, error} = useGetAccessTokenFromCookieTokenGet({
+	const {data, error} = $user_api.getAccessTokenFromCookieToken({
 		request: {
 			withCredentials: true,
 		},
 	})
-	const {data: dataLogin, error: errorLogin, mutate} = useLoginLoginPost()
+	const {data: dataLogin, error: errorLogin, mutate} = $user_api.login()
 
 	const login = async (username: string, password: string) => {
 		mutate({
-			params: {
+			data: {
 				username,
 				password
 			}
 		}, {
 			onSuccess: (data) => {
-				console.log(data)
 				setAccessToken(data?.access_token ?? null)
 			}
 		})

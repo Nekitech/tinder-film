@@ -2,7 +2,7 @@ from authx import RequestToken
 from fastapi import APIRouter, Depends, HTTPException, Response, Cookie
 
 from app.core.deps import get_auth_service, get_authx
-from app.schemas.user import UserLogin
+from app.schemas.user import UserLogin, LoginResponse
 from app.services.auth import AuthService
 
 router = APIRouter()
@@ -13,7 +13,7 @@ async def register(username: str, password: str, service: AuthService = Depends(
     return await service.register_user(username, password)
 
 
-@router.post("/login", tags=["Auth"])
+@router.post("/login", tags=["Auth"], response_model=LoginResponse)
 async def login(payload: UserLogin, response: Response, service: AuthService = Depends(get_auth_service)):
     access_token = await service.login(payload.username, payload.password)
 

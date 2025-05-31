@@ -13,7 +13,7 @@ const initialDrivenProps = {
 	cardWrapperX: 0,
 	buttonScaleBadAnswer: 1,
 	buttonScaleGoodAnswer: 1,
-	mainBgColor: "var(--color-grey-500)",
+	mainBgColor: "var(--color-bg-primary)",
 };
 
 const TinderCards = () => {

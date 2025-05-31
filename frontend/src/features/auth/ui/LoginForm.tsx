@@ -6,10 +6,9 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {Button} from "@/shared/components/ui/button";
 import {Input} from "@/shared/components/ui/input";
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
-import {useEffect} from "react";
 
 const LoginForm = () => {
-	const {login, accessToken} = useAuth()
+	const {login} = useAuth()
 	const form = useForm<z.infer<typeof loginFormScheme>>({
 		resolver: zodResolver(loginFormScheme),
 		defaultValues: {
@@ -20,13 +19,9 @@ const LoginForm = () => {
 	})
 
 	function onSubmit(values: z.infer<typeof loginFormScheme>) {
-
 		login(values.username, values.password)
 	}
 
-	useEffect(() => {
-		console.log(accessToken)
-	}, []);
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 border-2 border-grey-500 rounded-2xl p-4">
@@ -56,7 +51,7 @@ const LoginForm = () => {
 						</FormItem>
 					)}
 				/>
-				<Button type="submit">Submit</Button>
+				<Button type="submit" className={"cursor-pointer"}>Submit</Button>
 			</form>
 		</Form>
 	);

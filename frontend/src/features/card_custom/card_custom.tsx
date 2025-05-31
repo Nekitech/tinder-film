@@ -68,7 +68,7 @@ const CardCustom = ({
 		<>
 			<motion.div
 				id={`cardDrivenWrapper-${id}`}
-				className="absolute bg-white p-8 rounded-lg text-center w-full aspect-[100/150] pointer-events-none text-black origin-bottom shadow-card select-none"
+				className="absolute bg-white border-4 border-secondary-green  p-8 rounded-lg text-center w-full aspect-[100/150] pointer-events-none text-black origin-bottom shadow-card select-none"
 				style={{
 					y: drivenY,
 					rotate: drivenRotation,

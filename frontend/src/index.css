@@ -3,8 +3,8 @@
 @import "tw-animate-css";
 
 @theme {
-    --color-answer-bad: #F75064;
-    --color-answer-good: #82D350;
+    /*--color-answer-bad: #F75064;*/
+    /*--color-answer-good: #82D350;*/
     --color-grey-500: #6A6A6A;
     --color-blue-500: #051B71;
 
@@ -16,8 +16,19 @@
     --color-game-swipe-neutral: #fafafa;
     --color-game-swipe-right: #D4E0B2;
 
+    --color-bg-primary: #121212;
+    --color-accent-green: #00ff9f;
+    --color-accent-red: #ff005d;
+
+    --color-secondary-green: #00c37a;
+    --color-text-white: #f1f1f1;
+    --color-glass-bg: rgba(255, 255, 255, 0.05);
+    --color-glass-border: rgba(255, 255, 255, 0.1);
+
+
     --shadow-card: 0 0px 15px -2px rgb(0 0 0 / 0.2), 0 0 3px -2px rgb(0 0 0 / 0.1);
 }
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -135,28 +146,31 @@
     * {
         @apply border-border outline-ring/50;
     }
+
     body {
         @apply bg-background text-foreground;
     }
+
     :root {
-        --sidebar-background: 0 0% 98%;
-        --sidebar-foreground: 240 5.3% 26.1%;
-        --sidebar-primary: 240 5.9% 10%;
-        --sidebar-primary-foreground: 0 0% 98%;
-        --sidebar-accent: 240 4.8% 95.9%;
-        --sidebar-accent-foreground: 240 5.9% 10%;
-        --sidebar-border: 220 13% 91%;
-        --sidebar-ring: 217.2 91.2% 59.8%;
+        --sidebar: oklch(0.985 0 0);
+        --sidebar-foreground: oklch(0.145 0 0);
+        --sidebar-primary: oklch(0.205 0 0);
+        --sidebar-primary-foreground: oklch(0.985 0 0);
+        --sidebar-accent: oklch(0.97 0 0);
+        --sidebar-accent-foreground: oklch(0.205 0 0);
+        --sidebar-border: oklch(0.922 0 0);
+        --sidebar-ring: oklch(0.708 0 0);
     }
 
     .dark {
-        --sidebar-background: 240 5.9% 10%;
-        --sidebar-foreground: 240 4.8% 95.9%;
-        --sidebar-primary: 224.3 76.3% 48%;
-        --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 240 3.7% 15.9%;
-        --sidebar-accent-foreground: 240 4.8% 95.9%;
-        --sidebar-border: 240 3.7% 15.9%;
-        --sidebar-ring: 217.2 91.2% 59.8%;
+        --sidebar: oklch(0.205 0 0);
+        --sidebar-foreground: oklch(0.985 0 0);
+        --sidebar-primary: oklch(0.488 0.243 264.376);
+        --sidebar-primary-foreground: oklch(0.985 0 0);
+        --sidebar-accent: oklch(0.269 0 0);
+        --sidebar-accent-foreground: oklch(0.985 0 0);
+        --sidebar-border: oklch(1 0 0 / 10%);
+        --sidebar-ring: oklch(0.439 0 0);
+
     }
 }

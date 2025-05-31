@@ -3,3 +3,6 @@ venv
 dataset
 
 .python-version
+
+.env
+.env.development
