@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.db_connect import get_session
 from app.repositories.recommendation_data import RecommenderRepository
+from app.schemas.auth import AuthJWT
 from app.services.auth import AuthService
+from app.services.auth_jwt import AuthJWTService
 from app.services.implicit_service import ImplicitFeedbackService
 from app.services.ml_recommender import RecommenderService
 from app.services.users import UserService
@@ -27,12 +29,21 @@ def get_authx() -> AuthX:
     return authx
 
 
+def get_auth_jwt() -> AuthJWT:
+    return AuthJWT()
+
+
 def get_user_service(db: AsyncSession = Depends(get_session)) -> UserService:
     return UserService(db)
 
 
 def get_auth_service(db: AsyncSession = Depends(get_session), auth: AuthX = Depends(get_authx)) -> AuthService:
     return AuthService(db, auth)
+
+
+def get_auth_jwt_service(db: AsyncSession = Depends(get_session),
+                         auth: AuthJWT = Depends(get_auth_jwt)) -> AuthJWTService:
+    return AuthJWTService(db, auth)
 
 
 def get_model_storage() -> ModelStorage:

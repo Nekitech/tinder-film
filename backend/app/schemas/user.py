@@ -1,3 +1,4 @@
+from fastapi import Form
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -12,16 +13,20 @@ class UserCreate(UserBase):
 
 class UserOut(UserBase):
     id: int
+    username: str
 
     class Config:
         from_attributes = True
 
 
 class UserLogin(BaseModel):
-    username: str = Field(..., description="Username")
-    password: str = Field(..., description="Password")
+    username: str = Form(),
+    password: str = Form(),
 
+
+# class LoginResponse(BaseModel):
+#     code: int = Field(..., description="Status code of the response, e.g., 200 for success")
+#     access_token: str = Field(..., description="Generated access token for the user")
 
 class LoginResponse(BaseModel):
-    code: int = Field(..., description="Status code of the response, e.g., 200 for success")
     access_token: str = Field(..., description="Generated access token for the user")

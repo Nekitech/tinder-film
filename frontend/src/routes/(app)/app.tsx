@@ -15,6 +15,5 @@ function RouteComponent() {
 				<Outlet />
 			</div>
 		</SidebarProvider>
-
 	)
 }

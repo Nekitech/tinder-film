@@ -25,13 +25,14 @@ import type {
 
 import type {
   HTTPValidationError,
-  LoginLoginPostParams,
+  LoginResponse,
   RefreshTokensRefreshPostParams,
-  RegisterRegisterPostParams
+  RegisterRegisterPostParams,
+  UserLogin
 } from '../fastAPI.schemas';
 
 import { customInstance } from '../../custom-instance';
-import type { ErrorType } from '../../custom-instance';
+import type { ErrorType , BodyType } from '../../custom-instance';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -105,14 +106,15 @@ export const useRegisterRegisterPost = <TError = ErrorType<HTTPValidationError>,
  * @summary Login
  */
 export const loginLoginPost = (
-    params: LoginLoginPostParams,
+    userLogin: BodyType<UserLogin>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
-      return customInstance<unknown>(
+      return customInstance<LoginResponse>(
       {url: `/login`, method: 'POST',
-        params, signal
+      headers: {'Content-Type': 'application/json', },
+      data: userLogin, signal
     },
       options);
     }
@@ -120,8 +122,8 @@ export const loginLoginPost = (
 
 
 export const getLoginLoginPostMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginLoginPost>>, TError,{params: LoginLoginPostParams}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof loginLoginPost>>, TError,{params: LoginLoginPostParams}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginLoginPost>>, TError,{data: BodyType<UserLogin>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof loginLoginPost>>, TError,{data: BodyType<UserLogin>}, TContext> => {
     
 const mutationKey = ['loginLoginPost'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -133,10 +135,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginLoginPost>>, {params: LoginLoginPostParams}> = (props) => {
-          const {params} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginLoginPost>>, {data: BodyType<UserLogin>}> = (props) => {
+          const {data} = props ?? {};
 
-          return  loginLoginPost(params,requestOptions)
+          return  loginLoginPost(data,requestOptions)
         }
 
         
@@ -145,18 +147,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type LoginLoginPostMutationResult = NonNullable<Awaited<ReturnType<typeof loginLoginPost>>>
-    
+    export type LoginLoginPostMutationBody = BodyType<UserLogin>
     export type LoginLoginPostMutationError = ErrorType<HTTPValidationError>
 
     /**
  * @summary Login
  */
 export const useLoginLoginPost = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginLoginPost>>, TError,{params: LoginLoginPostParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginLoginPost>>, TError,{data: BodyType<UserLogin>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof loginLoginPost>>,
         TError,
-        {params: LoginLoginPostParams},
+        {data: BodyType<UserLogin>},
         TContext
       > => {
 

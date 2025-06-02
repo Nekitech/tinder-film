@@ -8,9 +8,34 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export interface LoginResponse {
+  /** Status code of the response, e.g., 200 for success */
+  code: number;
+  /** Generated access token for the user */
+  access_token: string;
+}
+
+export interface Recommendation {
+  movie_id: number;
+  title: string;
+  predicted_rating: number;
+}
+
+export interface RecommendationResponse {
+  user_id: number;
+  recommendations: Recommendation[];
+}
+
 export interface UserCreate {
   email: string;
   username: string;
+  password: string;
+}
+
+export interface UserLogin {
+  /** Username */
+  username: string;
+  /** Password */
   password: string;
 }
 
@@ -29,11 +54,6 @@ export interface ValidationError {
 }
 
 export type RegisterRegisterPostParams = {
-username: string;
-password: string;
-};
-
-export type LoginLoginPostParams = {
 username: string;
 password: string;
 };
@@ -65,4 +85,13 @@ export const RefreshTokensRefreshPostLocation = {
   json: 'json',
   query: 'query',
 } as const;
+
+export type TrainRecommenderRecommenderTrainPostParams = {
+limit?: number;
+};
+
+export type RecommendRecommenderRecommendationsUserIdGetParams = {
+n?: number;
+limit?: number;
+};
 
