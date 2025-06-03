@@ -1,13 +1,17 @@
 from fastapi import APIRouter, Depends
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from starlette import status
 
 from app.core.deps import get_auth_jwt_service
 from app.schemas.auth import TokenInfo
-from app.schemas.user import UserLogin
+from app.schemas.user import UserLogin, PayloadUser
 from app.services.auth_jwt import AuthJWTService
 
 http_bearer = HTTPBearer(auto_error=False)
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/login",
+)
 
 router = APIRouter(
     dependencies=[Depends(http_bearer)]
@@ -68,7 +72,15 @@ async def register(username: str, password: str, service: AuthJWTService = Depen
 
 
 @router.post("/login", tags=["Auth"], response_model=TokenInfo, status_code=status.HTTP_200_OK)
-async def login(user: UserLogin, service: AuthJWTService = Depends(get_auth_jwt_service)):
-    user = await service.login(user)
+async def login(user: OAuth2PasswordRequestForm = Depends(),
+                service: AuthJWTService = Depends(get_auth_jwt_service)):
+    return await service.login(UserLogin(username=user.username, password=user.password))
 
-    return user
+
+@router.get("/users/me/", tags=["Auth"], response_model=PayloadUser, status_code=status.HTTP_200_OK)
+async def auth_user_check_self_info(
+        token: str = Depends(oauth2_scheme),
+        auth_service: AuthJWTService = Depends(get_auth_jwt_service),
+):
+    payload = await auth_service.get_current_token_payload(token)
+    return payload

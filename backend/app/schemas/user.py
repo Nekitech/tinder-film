@@ -1,9 +1,9 @@
 from fastapi import Form
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    id: int
     username: str
 
 
@@ -20,13 +20,17 @@ class UserOut(UserBase):
 
 
 class UserLogin(BaseModel):
-    username: str = Form(),
-    password: str = Form(),
+    username: str = Form(...)
+    password: str = Form(...)
 
-
-# class LoginResponse(BaseModel):
-#     code: int = Field(..., description="Status code of the response, e.g., 200 for success")
-#     access_token: str = Field(..., description="Generated access token for the user")
 
 class LoginResponse(BaseModel):
     access_token: str = Field(..., description="Generated access token for the user")
+
+
+class PayloadUser(BaseModel):
+    sub: str
+    username: str
+    iat: int
+    exp: int
+    type: str

@@ -1,14 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 import jwt
-from fastapi import Form, HTTPException
+from fastapi import HTTPException, Depends
+from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from starlette import status
 
 from app.db.models import User, UserCredentials
 from app.schemas.auth import AuthJWT, TokenInfo
-from app.schemas.user import UserLogin
+from app.schemas.user import UserLogin, PayloadUser
+from app.services.users import UserService
 from app.utils.auth import hash_password, validate_password
 
 
@@ -17,9 +19,52 @@ class AuthJWTService:
     ACCESS_TOKEN_TYPE = "access"
     REFRESH_TOKEN_TYPE = "refresh"
 
-    def __init__(self, db: AsyncSession, auth: AuthJWT):
+    def __init__(self, db: AsyncSession, auth: AuthJWT, user_service: UserService):
         self.db = db
         self.auth = auth
+        self.user_service = user_service
+
+    def get_current_auth_user(self):
+        return self.get_auth_user_from_token_of_type(self.ACCESS_TOKEN_TYPE)
+
+    def validate_token_type(
+            self,
+            payload: PayloadUser,
+            token_type: str,
+    ) -> bool:
+        current_token_type = payload.get(self.TOKEN_TYPE_FIELD)
+        if current_token_type == token_type:
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"invalid token type {current_token_type!r} expected {token_type!r}",
+        )
+
+    def get_auth_user_from_token_of_type(self, token_type: str):
+        async def get_auth_user_from_token(
+                payload: PayloadUser = Depends(self.get_current_token_payload),
+        ) -> User:
+            self.validate_token_type(payload, token_type)
+            user = await self.user_service.get_user_by_id(payload.id)
+            return user
+
+        return get_auth_user_from_token
+
+    async def get_current_token_payload(
+            self,
+            token: str,
+    ) -> PayloadUser:
+        try:
+            payload = self.decode_jwt(
+                token=token,
+            )
+        except InvalidTokenError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"invalid token error: {e}",
+            )
+
+        return payload
 
     async def register_user(self, username: str, password: str):
         hashed = hash_password(password)
@@ -36,22 +81,21 @@ class AuthJWTService:
 
     async def validate_auth_user(
             self,
-            username: str = Form(),
-            password: str = Form(),
+            user_data: UserLogin
     ):
         unauthed_exc = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="invalid username or password",
         )
         result = await self.db.execute(
-            select(User).where(User.username == username)
+            select(User).where(User.username == user_data.username)
         )
         if not (user := result.scalar_one_or_none()):
             raise unauthed_exc
 
         creds = user.credentials
         if not validate_password(
-                password=password,
+                password=user_data.password,
                 hashed_password=creds.hashed_password.encode(),
         ):
             raise unauthed_exc
@@ -59,12 +103,12 @@ class AuthJWTService:
         return user
 
     async def login(self, user_data: UserLogin) -> TokenInfo:
-        validated_user = await self.validate_auth_user(user_data.username, user_data.password)
+        validated_user = await self.validate_auth_user(user_data)
 
         creds = validated_user.credentials
 
-        access_token = await self.create_access_token(user_data)
-        refresh_token = self.create_refresh_token(user_data)
+        access_token = await self.create_access_token(validated_user)
+        refresh_token = self.create_refresh_token(validated_user)
 
         creds.access_token = access_token
         creds.refresh_token = refresh_token
@@ -84,7 +128,7 @@ class AuthJWTService:
         expire_minutes = self.auth.access_token_expire_minutes
 
         to_encode = payload.copy()
-        now = datetime.now()
+        now = datetime.now(UTC)
         if expire_timedelta:
             expire = now + expire_timedelta
         else:
@@ -102,13 +146,13 @@ class AuthJWTService:
 
     def decode_jwt(self,
                    token: str | bytes,
-                   ) -> dict:
+                   ) -> PayloadUser:
         public_key: str = self.auth.public_key_path.read_text()
         algorithm = self.auth.algorithm,
         decoded = jwt.decode(
             token,
             public_key,
-            algorithms=[algorithm],
+            algorithms=algorithm,
         )
         return decoded
 
@@ -125,14 +169,10 @@ class AuthJWTService:
 
         )
 
-    async def create_access_token(self, creds: UserLogin) -> str:
-        user = (await self.db.execute(
-            select(User).where(User.username == creds.username)
-        )).scalar_one_or_none()
+    async def create_access_token(self, user: User) -> str:
 
         jwt_payload = {
-            "id": user.id,
-            "sub": user.username,
+            "sub": str(user.id),
             "username": user.username,
         }
         return self.create_jwt(
@@ -140,10 +180,9 @@ class AuthJWTService:
             token_data=jwt_payload,
         )
 
-    def create_refresh_token(self, user: UserLogin) -> str:
+    def create_refresh_token(self, user: User) -> str:
         jwt_payload = {
-            "sub": user.username,
-            # "username": user.username,
+            "sub": str(user.id),
         }
         return self.create_jwt(
             token_type=self.REFRESH_TOKEN_TYPE,

@@ -42,8 +42,10 @@ def get_auth_service(db: AsyncSession = Depends(get_session), auth: AuthX = Depe
 
 
 def get_auth_jwt_service(db: AsyncSession = Depends(get_session),
-                         auth: AuthJWT = Depends(get_auth_jwt)) -> AuthJWTService:
-    return AuthJWTService(db, auth)
+                         auth: AuthJWT = Depends(get_auth_jwt),
+                         user_service: UserService = Depends(get_user_service)
+                         ) -> AuthJWTService:
+    return AuthJWTService(db, auth, user_service)
 
 
 def get_model_storage() -> ModelStorage:
