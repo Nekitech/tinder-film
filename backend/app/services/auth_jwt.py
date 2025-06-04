@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, UTC
 
 import jwt
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -12,6 +13,10 @@ from app.schemas.auth import AuthJWT, TokenInfo
 from app.schemas.user import UserLogin, PayloadUser
 from app.services.users import UserService
 from app.utils.auth import hash_password, validate_password
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/login",
+)
 
 
 class AuthJWTService:
@@ -24,14 +29,12 @@ class AuthJWTService:
         self.auth = auth
         self.user_service = user_service
 
-    def get_current_auth_user(self):
-        return self.get_auth_user_from_token_of_type(self.ACCESS_TOKEN_TYPE)
-
     def validate_token_type(
             self,
             payload: PayloadUser,
             token_type: str,
     ) -> bool:
+        print(payload)
         current_token_type = payload.get(self.TOKEN_TYPE_FIELD)
         if current_token_type == token_type:
             return True
@@ -39,16 +42,6 @@ class AuthJWTService:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"invalid token type {current_token_type!r} expected {token_type!r}",
         )
-
-    def get_auth_user_from_token_of_type(self, token_type: str):
-        async def get_auth_user_from_token(
-                payload: PayloadUser = Depends(self.get_current_token_payload),
-        ) -> User:
-            self.validate_token_type(payload, token_type)
-            user = await self.user_service.get_user_by_id(payload.id)
-            return user
-
-        return get_auth_user_from_token
 
     async def get_current_token_payload(
             self,
@@ -122,17 +115,20 @@ class AuthJWTService:
     def encode_jwt(self,
                    payload: dict,
                    expire_timedelta: timedelta | None = None,
+                   expire_minutes: int | None = None,
                    ) -> str:
         private_key = self.auth.private_key_path.read_text()
         algorithm = self.auth.algorithm
-        expire_minutes = self.auth.access_token_expire_minutes
 
         to_encode = payload.copy()
         now = datetime.now(UTC)
+        # для refresh токена
         if expire_timedelta:
             expire = now + expire_timedelta
+        # для access токена
         else:
             expire = now + timedelta(minutes=expire_minutes)
+
         to_encode.update(
             exp=expire,
             iat=now,
@@ -159,6 +155,7 @@ class AuthJWTService:
     def create_jwt(self,
                    token_type: str,
                    token_data: dict,
+                   expire_minutes: int | None = None,
                    expire_timedelta: timedelta | None = None,
                    ) -> str:
         jwt_payload = {self.TOKEN_TYPE_FIELD: token_type}
@@ -166,6 +163,7 @@ class AuthJWTService:
         return self.encode_jwt(
             payload=jwt_payload,
             expire_timedelta=expire_timedelta,
+            expire_minutes=expire_minutes
 
         )
 
@@ -178,6 +176,7 @@ class AuthJWTService:
         return self.create_jwt(
             token_type=self.ACCESS_TOKEN_TYPE,
             token_data=jwt_payload,
+            expire_minutes=self.auth.access_token_expire_minutes
         )
 
     def create_refresh_token(self, user: User) -> str:

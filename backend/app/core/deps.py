@@ -2,7 +2,8 @@ import os
 
 from authx import AuthX, AuthXConfig
 from dotenv import load_dotenv
-from fastapi import Depends
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.db_connect import get_session
@@ -18,6 +19,10 @@ from app.utils.model_storage import ModelStorage
 load_dotenv()
 
 MODEL_PATH = "app/models/trained_model.pkl"
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/login",
+)
 
 
 def get_authx() -> AuthX:
@@ -70,3 +75,18 @@ def get_implicit_feedback_service(
         model_storage: ModelStorage = Depends(get_model_storage),
 ) -> ImplicitFeedbackService:
     return ImplicitFeedbackService(repository=repo, model_storage=model_storage)
+
+
+async def get_current_auth_user_for_refresh(
+        token: str = Depends(oauth2_scheme),
+        auth_service: AuthJWTService = Depends(get_auth_jwt_service),
+):
+    payload = await auth_service.get_current_token_payload(token)  # Разбор текущего токена
+    auth_service.validate_token_type(payload, token_type=auth_service.REFRESH_TOKEN_TYPE)  # Проверяем тип токена
+    user = await auth_service.user_service.get_user_by_id(int(payload.get('sub')))  # Получение пользователя
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+    return user

@@ -43,7 +43,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, unique=True, index=True)
 
     credentials: Mapped["UserCredentials"] = relationship(
-        back_populates="user", uselist=False, lazy="joined"
+        back_populates="user", uselist=False, lazy="joined",
+        cascade="all, delete-orphan",
     )
 
 
@@ -51,7 +52,7 @@ class UserCredentials(Base):
     __tablename__ = "user_credentials"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String)
     access_token: Mapped[str | None] = mapped_column(TEXT)
     refresh_token: Mapped[str | None] = mapped_column(TEXT)
