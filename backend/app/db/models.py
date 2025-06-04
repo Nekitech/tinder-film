@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, ForeignKey, Integer, TEXT
+from sqlalchemy import String, ForeignKey, Integer, TEXT, Boolean, TIMESTAMP, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -58,3 +59,15 @@ class UserCredentials(Base):
     refresh_token: Mapped[str | None] = mapped_column(TEXT)
 
     user: Mapped["User"] = relationship(back_populates="credentials", lazy="joined")
+
+
+class Interaction(Base):
+    __tablename__ = "interactions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    movie_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    liked: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), nullable=False
+    )

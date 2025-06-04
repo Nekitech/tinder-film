@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as authLoginImport } from './routes/(auth)/login'
 import { Route as appAppImport } from './routes/(app)/app'
+import { Route as appAppStatisticsImport } from './routes/(app)/app.statistics'
 import { Route as appAppRecommendationsImport } from './routes/(app)/app.recommendations'
 
 // Create/Update Routes
@@ -27,6 +28,12 @@ const appAppRoute = appAppImport.update({
   id: '/(app)/app',
   path: '/app',
   getParentRoute: () => rootRoute,
+} as any)
+
+const appAppStatisticsRoute = appAppStatisticsImport.update({
+  id: '/statistics',
+  path: '/statistics',
+  getParentRoute: () => appAppRoute,
 } as any)
 
 const appAppRecommendationsRoute = appAppRecommendationsImport.update({
@@ -60,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAppRecommendationsImport
       parentRoute: typeof appAppImport
     }
+    '/(app)/app/statistics': {
+      id: '/(app)/app/statistics'
+      path: '/statistics'
+      fullPath: '/app/statistics'
+      preLoaderRoute: typeof appAppStatisticsImport
+      parentRoute: typeof appAppImport
+    }
   }
 }
 
@@ -67,10 +81,12 @@ declare module '@tanstack/react-router' {
 
 interface appAppRouteChildren {
   appAppRecommendationsRoute: typeof appAppRecommendationsRoute
+  appAppStatisticsRoute: typeof appAppStatisticsRoute
 }
 
 const appAppRouteChildren: appAppRouteChildren = {
   appAppRecommendationsRoute: appAppRecommendationsRoute,
+  appAppStatisticsRoute: appAppStatisticsRoute,
 }
 
 const appAppRouteWithChildren =
@@ -80,12 +96,14 @@ export interface FileRoutesByFullPath {
   '/app': typeof appAppRouteWithChildren
   '/login': typeof authLoginRoute
   '/app/recommendations': typeof appAppRecommendationsRoute
+  '/app/statistics': typeof appAppStatisticsRoute
 }
 
 export interface FileRoutesByTo {
   '/app': typeof appAppRouteWithChildren
   '/login': typeof authLoginRoute
   '/app/recommendations': typeof appAppRecommendationsRoute
+  '/app/statistics': typeof appAppStatisticsRoute
 }
 
 export interface FileRoutesById {
@@ -93,14 +111,20 @@ export interface FileRoutesById {
   '/(app)/app': typeof appAppRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/(app)/app/recommendations': typeof appAppRecommendationsRoute
+  '/(app)/app/statistics': typeof appAppStatisticsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/app' | '/login' | '/app/recommendations'
+  fullPaths: '/app' | '/login' | '/app/recommendations' | '/app/statistics'
   fileRoutesByTo: FileRoutesByTo
-  to: '/app' | '/login' | '/app/recommendations'
-  id: '__root__' | '/(app)/app' | '/(auth)/login' | '/(app)/app/recommendations'
+  to: '/app' | '/login' | '/app/recommendations' | '/app/statistics'
+  id:
+    | '__root__'
+    | '/(app)/app'
+    | '/(auth)/login'
+    | '/(app)/app/recommendations'
+    | '/(app)/app/statistics'
   fileRoutesById: FileRoutesById
 }
 
@@ -131,7 +155,8 @@ export const routeTree = rootRoute
     "/(app)/app": {
       "filePath": "(app)/app.tsx",
       "children": [
-        "/(app)/app/recommendations"
+        "/(app)/app/recommendations",
+        "/(app)/app/statistics"
       ]
     },
     "/(auth)/login": {
@@ -139,6 +164,10 @@ export const routeTree = rootRoute
     },
     "/(app)/app/recommendations": {
       "filePath": "(app)/app.recommendations.tsx",
+      "parent": "/(app)/app"
+    },
+    "/(app)/app/statistics": {
+      "filePath": "(app)/app.statistics.tsx",
       "parent": "/(app)/app"
     }
   }

@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import Any
+from typing import Optional
 
 import numpy as np
 from implicit.als import AlternatingLeastSquares
@@ -16,27 +16,26 @@ class ModelStorage:
     def __init__(self, path: str):
         self.path = path
 
-    def save(self, model: Any) -> None:
+    def save(self, model, trainset: Optional[object] = None):
         """
-        Сохраняет модель в указанный путь.
+        Сохраняет модель и, при наличии, trainset в файл.
         """
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        with open(self.path, "wb") as f:
-            pickle.dump(model, f)
-        print(f"✅ Модель сохранена: {self.path}")
+        data = {"model": model}
+        if trainset is not None:
+            data["trainset"] = trainset
 
-    def load(self) -> Any:
+        with open(self.path, "wb") as f:
+            pickle.dump(data, f)
+
+    def load(self):
         """
-        Загружает модель из файла.
+        Загружает модель и trainset (если он был сохранён).
         """
         if not os.path.exists(self.path):
-            print(f"⚠️ Файл модели не найден: {self.path}")
-            return None
-
+            raise FileNotFoundError(f"Model file {self.path} not found.")
         with open(self.path, "rb") as f:
-            model = pickle.load(f)
-        print(f"✅ Модель загружена: {self.path}")
-        return model
+            data = pickle.load(f)
+        return data["model"], data.get("trainset")
 
     def exists(self) -> bool:
         return os.path.exists(self.path)

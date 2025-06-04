@@ -47,4 +47,4 @@ class RecommenderService:
         ]
 
     def load_model(self):
-        self.model = self.model_storage.load()
+        self.model, _ = self.model_storage.load()

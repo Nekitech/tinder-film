@@ -8,7 +8,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/shared/components/ui/sidebar"
-import {AlignCenterHorizontalIcon, Home, LogIn} from "lucide-react"
+import {AlignCenterHorizontalIcon, ChartSpline, Home, LogIn} from "lucide-react"
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
 
 const items = [
@@ -21,6 +21,11 @@ const items = [
 		title: "Recommendations",
 		url: "/app/recommendations",
 		icon: AlignCenterHorizontalIcon
+	},
+	{
+		title: "Statistics",
+		url: "/app/statistics",
+		icon: ChartSpline
 	},
 	{
 		title: "Login",
