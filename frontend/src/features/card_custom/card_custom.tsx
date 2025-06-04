@@ -75,7 +75,7 @@ const CardCustom = ({
 					x: drivenX,
 				}}
 			>
-				<p className={'text-green-900'}>{ data.description }</p>
+				<p className={'text-green-900'}>{ data.name }</p>
 
 				<div
 					id="illustration"

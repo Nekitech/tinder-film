@@ -32,8 +32,10 @@ const items = [
 const appTitle = "Tinder Film"
 
 export function AppSidebar() {
-	const {logout} = useAuth()
-
+	const {logout, user} = useAuth()
+	if (user) {
+		console.log(user)
+	}
 	return (
 		<Sidebar>
 			<SidebarContent>
@@ -63,6 +65,17 @@ export function AppSidebar() {
 							)) }
 						</SidebarMenu>
 					</SidebarGroupContent>
+				</SidebarGroup>
+				<SidebarGroup>
+					<SidebarGroupLabel>{ "User" }</SidebarGroupLabel>
+					{
+						user && (
+							<SidebarGroupContent>
+								<p>Имя пользователя: { user.username }</p>
+								<time>Время захода: { new Date(user.iat * 1000).toLocaleTimeString() }</time>
+							</SidebarGroupContent>
+						)
+					}
 				</SidebarGroup>
 			</SidebarContent>
 		</Sidebar>

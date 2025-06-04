@@ -1,11 +1,13 @@
 "use client";
 import {useEffect, useState} from "react";
-import CardCustom from "@/features/card_custom/card_custom.tsx";
 import {easeOutExpo} from "@/shared/lib/easings.data.ts";
 import {CardSwipeDirection, IsDragOffBoundary} from "@/shared/types/cards.type.ts";
 import GameActionBtn from "@/features/card_custom/card_actions_btn.tsx";
-import {useFilmsContext} from "@/shared/providers/films.provider.tsx";
 import {AnimatePresence, motion} from "framer-motion";
+import {$api} from "@/shared/api/new_api.ts";
+import {useAuth} from "@/shared/providers/auth.provider.tsx";
+import CardCustom from "@/features/card_custom/card_custom.tsx";
+import {components} from "@/shared/api/generated/schema";
 // import { BgPattern } from "@/components/ui";
 
 
@@ -18,8 +20,32 @@ const initialDrivenProps = {
 
 const TinderCards = () => {
 
-	const [films, setFilms] = useFilmsContext()
+	const [films, setFilms] = useState<components["schemas"]["RecommendationResponse"]["recommendations"]>([]);
 
+	const {user} = useAuth()
+
+	const {data} = $api.useQuery(
+		"get",
+		"/recommender/recommendations/{user_id}",
+		{
+			params: {
+				path: {
+					"user_id": String(user?.sub)
+				},
+				query: {
+					n: 10,
+					limit: 1000
+				}
+			}
+		}
+	)
+
+	useEffect(() => {
+		console.log(data?.recommendations)
+		if (data) {
+			setFilms(data.recommendations)
+		}
+	}, [data])
 	const [direction, setDirection] = useState<CardSwipeDirection | "">("");
 	const [isDragOffBoundary, setIsDragOffBoundary] =
         useState<IsDragOffBoundary>(null);
@@ -86,18 +112,22 @@ const TinderCards = () => {
 							return (
 								<motion.div
 									key={`card-${i}`}
-									id={`card-${card.id}`}
-									className={`relative `}
+									id={`card-${card.movie_id}`}
+									className="relative"
 									variants={cardVariants}
 									initial="remainings"
-									animate={
-										isLast ? "current" : isUpcoming ? "upcoming" : "remainings"
-									}
+									animate={isLast ? "current" : isUpcoming ? "upcoming" : "remainings"}
 									exit="exit"
 								>
 									<CardCustom
-										data={card}
-										id={card.id}
+										data={{
+											id: card.movie_id,
+											description: "",
+											image: "",
+											name: card.title,
+											rating: card.predicted_rating
+										}}
+										id={card.movie_id}
 										setCardDrivenProps={setCardDrivenProps}
 										setIsDragging={setIsDragging}
 										isDragging={isDragging}
@@ -109,6 +139,7 @@ const TinderCards = () => {
 							);
 						}) }
 					</AnimatePresence>
+
 				</div>
 				<div
 					id="actions"

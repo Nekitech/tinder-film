@@ -1,28 +1,33 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
-import {useQueryClient} from '@tanstack/react-query';
-import {$auth_api} from "@/shared/api/auth.api.ts";
+import {$api} from "@/shared/api/new_api.ts";
 
 type AuthUser = {
-    userId: string;
+    sub: string;
     username: string;
+    iat: number;
+    exp: number;
+    type: string
 };
 
 export type AuthContextType = {
     user: AuthUser | null;
     login?: (username: string, password: string) => Promise<{ userData: any, isPending: any, status: any }>;
     logout?: () => void;
-    isAuthenticated: () => boolean
+    isAuthenticated: (() => boolean) | undefined;
 };
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
-	const queryClient = useQueryClient();
 	const accessToken = localStorage.getItem('access_token');
 	// const refreshToken = localStorage.getItem('refresh_token');
 
 	const [user, setUser] = useState<AuthUser | null>(null);
-	const {mutateAsync, isPending, status} = $auth_api.login.hook();
+	const {mutateAsync, isPending, status} = $api.useMutation(
+		"post",
+		"/login",
+	)
 
 	// const refreshMutation = $auth_api.refresh.hook({
 	// 	request: {
@@ -32,22 +37,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 	// 	},
 	// }, queryClient);
 
-	const {data, isSuccess, refetch} = $auth_api.usersMe.hook(
-		accessToken
-			? {
-				request: {
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-				},
+	const {data, isSuccess, refetch} = $api.useQuery(
+		"get",
+		"/users/me/",
+		{
+			headers: {
+				"Authorization": `Bearer ${accessToken}`,
 			}
-			: undefined,
-		queryClient
+		}
 	);
 
 	useEffect(() => {
 		if (isSuccess && data) {
-			setUser({userId: data.sub, username: data.username});
+			setUser({...data});
 		}
 	}, [isSuccess, data]);
 
@@ -79,7 +81,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 	// }, [isSuccess, accessToken, refreshToken, refreshMutation, queryClient, refetch]);
 
 	const login = async (username: string, password: string) => {
-		const response = await mutateAsync({data: {username, password}});
+		const response = await mutateAsync({
+			body: {
+				username,
+				password
+			}
+		});
 
 		localStorage.setItem('access_token', response.access_token);
 		localStorage.setItem('refresh_token', response.refresh_token!);
@@ -90,8 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
 		if (userInfo) {
 			setUser({
-				userId: userInfo.sub,
-				username: userInfo.username,
+				...userInfo
 			});
 		}
 
@@ -107,7 +113,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 		localStorage.removeItem('access_token');
 		localStorage.removeItem('refresh_token');
 		setUser(null);
-		queryClient.clear();
 	};
 
 	const isAuthenticated = () => {

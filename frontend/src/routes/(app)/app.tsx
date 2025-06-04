@@ -5,8 +5,8 @@ import {SidebarProvider, SidebarTrigger} from "@/shared/components/ui/sidebar.ts
 export const Route = createFileRoute('/(app)/app')({
 	component: RouteComponent,
 	beforeLoad: ({context, location}) => {
-		console.log(context)
-		if (!context.auth.isAuthenticated()) {
+		const auth = context.auth.isAuthenticated
+		if (auth && !auth()) {
 			throw redirect({
 				to: '/login',
 				search: {

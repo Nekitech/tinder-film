@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from starlette import status
 
 from app.core.deps import get_auth_jwt_service, get_current_auth_user_for_refresh
 from app.db.models import User
-from app.schemas.auth import TokenInfo
+from app.schemas.auth import TokenInfo, LoginRequest
 from app.schemas.user import UserLogin, PayloadUser
 from app.services.auth_jwt import AuthJWTService
 
@@ -25,10 +25,9 @@ async def register(username: str, password: str, service: AuthJWTService = Depen
 
 
 @router.post("/login", tags=["Auth"], response_model=TokenInfo, status_code=status.HTTP_200_OK)
-async def login(username: str = Form(...),
-                password: str = Form(...),
+async def login(user: LoginRequest,
                 service: AuthJWTService = Depends(get_auth_jwt_service)):
-    return await service.login(UserLogin(username=username, password=password))
+    return await service.login(UserLogin(username=user.username, password=user.password))
 
 
 @router.post(

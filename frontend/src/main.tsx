@@ -12,7 +12,7 @@ const router = createRouter({
 	scrollRestoration: true,
 	context: {
 		auth: {
-			isAuthenticated: false,
+			isAuthenticated: undefined,
 			user: null
 		}
 	}
@@ -43,7 +43,6 @@ const rootElement = document.getElementById('root')!
 
 function AuthApp() {
 	const auth = useAuth()
-	console.log(auth)
 	return <RouterProvider router={router} context={{auth}} />
 }
 
