@@ -6,9 +6,11 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {Button} from "@/shared/components/ui/button";
 import {Input} from "@/shared/components/ui/input";
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
+import {useNavigate} from "@tanstack/react-router";
 
 const LoginForm = () => {
-	const {login} = useAuth()
+	const {login, isAuthenticated} = useAuth()
+	const navigate = useNavigate()
 	const form = useForm<z.infer<typeof loginFormScheme>>({
 		resolver: zodResolver(loginFormScheme),
 		defaultValues: {
@@ -18,8 +20,16 @@ const LoginForm = () => {
 
 	})
 
-	function onSubmit(values: z.infer<typeof loginFormScheme>) {
-		login(values.username, values.password)
+	async function onSubmit(values: z.infer<typeof loginFormScheme>) {
+		await login!(values.username, values.password)
+
+		if (isAuthenticated()) {
+			console.log('auth success')
+			navigate({
+				to: '/app'
+			})
+		}
+
 	}
 
 	return (

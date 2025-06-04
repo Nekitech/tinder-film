@@ -3,13 +3,19 @@ import './index.css'
 import ReactDOM from 'react-dom/client';
 import {createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen.ts";
-import {AuthProvider} from "@/shared/providers/auth.provider.tsx";
+import {AuthProvider, useAuth} from "@/shared/providers/auth.provider.tsx";
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 const router = createRouter({
 	routeTree,
 	defaultPreload: 'intent',
 	scrollRestoration: true,
+	context: {
+		auth: {
+			isAuthenticated: false,
+			user: null
+		}
+	}
 
 })
 
@@ -35,6 +41,12 @@ const queryClient = new QueryClient()
 
 const rootElement = document.getElementById('root')!
 
+function AuthApp() {
+	const auth = useAuth()
+	console.log(auth)
+	return <RouterProvider router={router} context={{auth}} />
+}
+
 if (!rootElement?.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement)
 	root.render(
@@ -42,7 +54,7 @@ if (!rootElement?.innerHTML) {
 			<QueryClientProvider client={queryClient}>
 				<AuthProvider>
 					{ /*<FilmsProvider>*/ }
-					<RouterProvider router={router} />
+					<AuthApp />
 					{ /*</FilmsProvider>*/ }
 				</AuthProvider>
 			</QueryClientProvider>
