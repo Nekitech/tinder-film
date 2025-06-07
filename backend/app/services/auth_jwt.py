@@ -60,15 +60,29 @@ class AuthJWTService:
         return payload
 
     async def register_user(self, username: str, password: str):
+        # Проверка: есть ли уже пользователь с таким username
+        existing_user = await self.db.execute(
+            select(User).where(User.username == username)
+        )
+        if existing_user.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Пользователь с таким username уже существует"
+            )
+
+        # Хеширование пароля
         hashed = hash_password(password)
+
+        # Создание нового пользователя
         user = User(username=username)
-
         self.db.add(user)
-        await self.db.flush()  # Получить user.id до коммита
+        await self.db.flush()  # Получаем user.id до коммита
 
+        # Создание учетных данных
         creds = UserCredentials(user_id=user.id, hashed_password=hashed.decode())
         self.db.add(creds)
 
+        # Финальный коммит
         await self.db.commit()
         return user
 

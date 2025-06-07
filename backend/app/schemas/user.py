@@ -7,8 +7,9 @@ class UserBase(BaseModel):
     username: str
 
 
-class UserCreate(UserBase):
-    password: str
+class UserCreate(BaseModel):
+    username: str = Form(...)
+    password: str = Form(...)
 
 
 class UserOut(UserBase):

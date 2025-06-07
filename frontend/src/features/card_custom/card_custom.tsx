@@ -4,6 +4,7 @@ import {Dispatch, SetStateAction} from "react";
 
 import {motion, useMotionValue, useMotionValueEvent, useTransform,} from "framer-motion";
 import {Film} from "@/shared/types/films.type.ts";
+import {CardSwipeDirection} from "@/shared/types/cards.type.ts";
 
 
 type Props = {
@@ -15,6 +16,9 @@ type Props = {
     isLast: boolean;
     setIsDragOffBoundary: Dispatch<SetStateAction<any>>;
     setDirection: Dispatch<SetStateAction<any>>;
+    handleActionBtnOnClick: (
+        direction: CardSwipeDirection,
+    ) => void
 };
 
 
@@ -26,7 +30,8 @@ const CardCustom = ({
 	isDragging,
 	isLast,
 	setIsDragOffBoundary,
-	setDirection
+	setDirection,
+	handleActionBtnOnClick
 }: Props) => {
 
 	const x = useMotionValue(0);
@@ -126,6 +131,7 @@ const CardCustom = ({
 					const direction = info.offset.x > 0 ? "right" : "left";
 
 					if (isOffBoundary) {
+						handleActionBtnOnClick(direction)
 						setDirection(direction);
 					}
 				}}

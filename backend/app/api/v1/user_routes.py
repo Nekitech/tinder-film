@@ -3,15 +3,16 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 
 from app.core.deps import get_user_service
-from app.schemas.user import UserOut, UserCreate
+from app.schemas.user import UserOut
 from app.services.users import UserService
 
 router = APIRouter()
 
 
-@router.post("/users/", response_model=UserOut, tags=["Users 🧘"])
-async def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
-    return await service.create_user(user)
+#
+# @router.post("/users/", response_model=UserOut, tags=["Users 🧘"])
+# async def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
+#     return await service.create_user(user)
 
 
 @router.get("/users/{user_id}", response_model=UserOut, tags=["Users 🧘"])

@@ -24,7 +24,6 @@ class StatisticRepo:
             .limit(limit)
         )
         result = await self.db.execute(stmt)
-        print(result)
         return [
             {"movie_id": row.id, "title": row.title, "rating": row.rating}
             for row in result.fetchall()

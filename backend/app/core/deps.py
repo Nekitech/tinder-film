@@ -7,12 +7,15 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.db_connect import get_session
+from app.db.interactioins import InteractionsRepository
 from app.db.statistic import StatisticRepo
 from app.repositories.recommendation_data import RecommenderRepository
 from app.repositories.similar_user_repository import SimilarUsersRepository
 from app.schemas.auth import AuthJWT
 from app.services.auth import AuthService
 from app.services.auth_jwt import AuthJWTService
+from app.services.implicit_service import ImplicitFeedbackService
+from app.services.interactions import InteractionsService
 from app.services.ml_recommender import RecommenderService
 from app.services.ml_similar_user import SimilarUsersService
 from app.services.statistic import StatisticService
@@ -23,6 +26,7 @@ load_dotenv()
 
 MODEL_PATH_SVD = "app/models/trained_model_recommender.pkl"
 MODEL_PATH_KNNBasic = "app/models/trained_model_similar_user.pkl"
+MODEL_PATH_IMPLICIT_FEEDBACK = "app/models/trained_model_implicit_feedback.pkl.npz"
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/login",
@@ -50,6 +54,10 @@ def get_auth_service(db: AsyncSession = Depends(get_session), auth: AuthX = Depe
     return AuthService(db, auth)
 
 
+def get_interactions_repo(db: AsyncSession = Depends(get_session)) -> InteractionsRepository:
+    return InteractionsRepository(db)
+
+
 def get_auth_jwt_service(db: AsyncSession = Depends(get_session),
                          auth: AuthJWT = Depends(get_auth_jwt),
                          user_service: UserService = Depends(get_user_service)
@@ -65,24 +73,33 @@ def get_model_storage_knnbasic() -> ModelStorage:
     return ModelStorage(MODEL_PATH_KNNBasic)
 
 
+def get_model_storage_implicit_feedback() -> ModelStorage:
+    return ModelStorage(MODEL_PATH_IMPLICIT_FEEDBACK)
+
+
 async def get_recommender_repository(
         db: AsyncSession = Depends(get_session)
 ) -> RecommenderRepository:
     return RecommenderRepository(db)
 
 
+def get_implicit_feedback_service(repo: InteractionsRepository = Depends(get_interactions_repo),
+                                  model: ModelStorage = Depends(
+                                      get_model_storage_implicit_feedback)) -> ImplicitFeedbackService:
+    return ImplicitFeedbackService(repo, model)
+
+
 def get_ml_recommender_service(
         repo: RecommenderRepository = Depends(get_recommender_repository),
         storage: ModelStorage = Depends(get_model_storage_svd),
+        interactions_repo: InteractionsRepository = Depends(get_interactions_repo),
+        implicit_service: ImplicitFeedbackService = Depends(get_implicit_feedback_service)
 ) -> RecommenderService:
-    return RecommenderService(repository=repo, model_storage=storage)
-
-
-# def get_implicit_feedback_service(
-#         repo: RecommenderRepository = Depends(get_recommender_repository),
-#         model_storage: ModelStorage = Depends(get_model_storage),
-# ) -> ImplicitFeedbackService:
-#     return ImplicitFeedbackService(repository=repo, model_storage=model_storage)
+    return RecommenderService(repository=repo,
+                              model_storage=storage,
+                              interactions_repo=interactions_repo,
+                              implicit_service=implicit_service
+                              )
 
 
 async def get_current_auth_user_for_refresh(
@@ -115,3 +132,8 @@ def get_repo_similar_user(db: AsyncSession = Depends(get_session)):
 def get_similar_users_service(model: ModelStorage = Depends(get_model_storage_knnbasic),
                               repo: SimilarUsersRepository = Depends(get_repo_similar_user)) -> SimilarUsersService:
     return SimilarUsersService(repo, model)
+
+
+def get_interaction_service(db: AsyncSession = Depends(get_session)):
+    repository = InteractionsRepository(db=db)
+    return InteractionsService(repository=repository)

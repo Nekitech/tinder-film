@@ -1,3 +1,4 @@
+import time
 from typing import List, Dict
 
 import pandas as pd
@@ -13,7 +14,8 @@ ratings_table = Table(
     metadata,
     Column("user_id", Integer, primary_key=True),
     Column("movie_id", Integer, nullable=False),
-    Column("rating", Float, nullable=False)
+    Column("rating", Float, nullable=False),
+    Column("timestamp", Integer, nullable=False)
 )
 
 movies_table = Table(
@@ -52,3 +54,28 @@ class RecommenderRepository:
         )
         rows = result.mappings().all()
         return {row["id"]: row["title"] for row in rows}
+
+    async def create_rating(self, user_id: int, movie_id: int, rating: float):
+        """
+        Создает новую запись в таблице ratings.
+        :param user_id: ID пользователя
+        :param movie_id: ID фильма
+        :param rating: Оценка пользователя (1.0-5.0)
+        :return: Словарь с информацией о добавленной записи
+        """
+        timestamp = int(time.time())
+
+        query = ratings_table.insert().values(
+            user_id=user_id,
+            movie_id=movie_id,
+            rating=rating,
+            timestamp=timestamp
+        ).returning(
+            ratings_table.c.user_id,
+            ratings_table.c.movie_id,
+            ratings_table.c.rating,
+            ratings_table.c.timestamp
+        )
+        result = await self.db.execute(query)
+        await self.db.commit()
+        return result.fetchone()

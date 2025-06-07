@@ -8,6 +8,8 @@ import {$api} from "@/shared/api/new_api.ts";
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
 import CardCustom from "@/features/card_custom/card_custom.tsx";
 import {components} from "@/shared/api/generated/schema";
+import {Slider} from "@/shared/components/ui/slider.tsx";
+import {Checkbox} from "@/shared/components/ui/checkbox.tsx";
 // import { BgPattern } from "@/components/ui";
 
 
@@ -19,10 +21,38 @@ const initialDrivenProps = {
 };
 
 const TinderCards = () => {
+	const [chooseRating, setChooseRating] = useState<number>(1);
+	const [isRating, setIsRating] = useState<boolean>(true);
 
 	const [films, setFilms] = useState<components["schemas"]["RecommendationResponse"]["recommendations"]>([]);
 
 	const {user} = useAuth()
+
+	const {mutate: mutateLikeOrDislike} = $api.useMutation(
+		"post",
+		"/interactions/like_or_dislike",
+		{
+			onSuccess: () => {
+				console.log("success like or dislike")
+			},
+			onError: () => {
+				console.log("error like or dislike")
+			}
+		}
+	)
+
+	const {mutate: mutateRating} = $api.useMutation(
+		"post",
+		"/recommender/ratings",
+		{
+			onSuccess: () => {
+				console.log("success rating")
+			},
+			onError: () => {
+				console.log("error rating")
+			}
+		}
+	)
 
 	const {data} = $api.useQuery(
 		"get",
@@ -39,9 +69,7 @@ const TinderCards = () => {
 			}
 		}
 	)
-
 	useEffect(() => {
-		console.log(data?.recommendations)
 		if (data) {
 			setFilms(data.recommendations)
 		}
@@ -52,8 +80,43 @@ const TinderCards = () => {
 	const [cardDrivenProps, setCardDrivenProps] = useState(initialDrivenProps);
 	const [isDragging, setIsDragging] = useState(false);
 
-	const handleActionBtnOnClick = (btn: CardSwipeDirection) => {
-		setDirection(btn);
+
+	const handleLikeOrDislike = (direction: CardSwipeDirection) => {
+		const data = {
+			user_id: Number(user?.sub) as number,
+			movie_id: Number(films[films.length - 1]?.movie_id) as number,
+			liked: true
+		}
+		switch (direction) {
+		case "left":
+			data["liked"] = false
+			return data
+		case "right":
+			data["liked"] = true
+			return data
+		default:
+			throw new Error("Unknown direction")
+
+		}
+	}
+
+	const handleActionBtnOnClick = (direction: CardSwipeDirection) => {
+		mutateLikeOrDislike({
+			params: {
+				query: handleLikeOrDislike(direction)
+			}
+		})
+		if (!isRating) {
+			mutateRating({
+				body: {
+					user_id: Number(user?.sub) as number,
+					movie_id: Number(films[films.length - 1]?.movie_id) as number,
+					rating: chooseRating
+				}
+			})
+		}
+		setDirection(direction);
+		setIsRating(true)
 	};
 
 	useEffect(() => {
@@ -134,6 +197,7 @@ const TinderCards = () => {
 										isLast={isLast}
 										setIsDragOffBoundary={setIsDragOffBoundary}
 										setDirection={setDirection}
+										handleActionBtnOnClick={handleActionBtnOnClick}
 									/>
 								</motion.div>
 							);
@@ -158,6 +222,30 @@ const TinderCards = () => {
 						scale={cardDrivenProps.buttonScaleGoodAnswer}
 						isDragOffBoundary={isDragOffBoundary}
 						onClick={() => handleActionBtnOnClick("right")}
+					/>
+				</div>
+				<p>{ chooseRating }</p>
+				<Slider
+					max={5}
+					min={1}
+					step={0.5}
+					disabled={isRating}
+					className="w-1/4 cursor-pointer"
+					onValueChange={(value) => {
+						if (value[0]) {
+							setChooseRating(value[0])
+						}
+
+					}}
+				/>
+				<div className={'flex items-center justify-center w-full gap-4'}>
+					<p>Включить рейтинг:</p>
+					<Checkbox
+						className={"cursor-pointer"}
+						checked={!isRating}
+						onClick={() => {
+							setIsRating(!isRating);
+						}}
 					/>
 				</div>
 			</div>

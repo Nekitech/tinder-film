@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -6,7 +6,8 @@ from pydantic import BaseModel
 class Recommendation(BaseModel):
     movie_id: int  # Предсказания используют поле `movie_id`
     title: str
-    predicted_rating: float
+    score: float
+    predicted_rating: Optional[float] = None
 
 
 class RecommendationResponse(BaseModel):

@@ -25,7 +25,7 @@ class UserService:
         await self.db.refresh(user)
         return user
 
-    async def get_user_by_id(self, user_id: int) -> UserOut | None:
+    async def get_user_by_id(self, user_id: id) -> UserOut | None:
         """Получить пользователя по его ID."""
         query = select(User).where(User.id == user_id)
         try:
