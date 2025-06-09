@@ -7,9 +7,12 @@ import {Button} from "@/shared/components/ui/button";
 import {Input} from "@/shared/components/ui/input";
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
 import {Link, useNavigate} from "@tanstack/react-router";
+import {useState} from "react";
+import {Spinner} from "@/shared/components/ui/spinner.tsx";
 
 const LoginForm = () => {
 	const {login, isAuthenticated} = useAuth()
+	const [isPendingLogin, setIsPendingLogin] = useState(false)
 	const navigate = useNavigate()
 	const form = useForm<z.infer<typeof loginFormScheme>>({
 		resolver: zodResolver(loginFormScheme),
@@ -21,16 +24,24 @@ const LoginForm = () => {
 	})
 
 	async function onSubmit(values: z.infer<typeof loginFormScheme>) {
-		await login!(values.username, values.password)
-
-		if (isAuthenticated?.()) {
-			console.log('auth success')
-			navigate({
-				to: '/app/recommendations'
-			})
+		setIsPendingLogin(true);
+		try {
+			await login!(values.username, values.password);
+			if (isAuthenticated?.()) {
+				navigate({to: '/app/recommendations'});
+			}
+		} catch (err) {
+			console.error("Login error", err);
+		} finally {
+			setIsPendingLogin(false);
 		}
-
 	}
+
+
+	if (isPendingLogin) {
+		return <Spinner size={"large"} />
+	}
+
 
 	return (
 		<Form {...form}>

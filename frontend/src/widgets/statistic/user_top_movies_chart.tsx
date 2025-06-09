@@ -1,11 +1,12 @@
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
 import {$api} from "@/shared/api/new_api.ts";
 import {ChartBarLabelCustom} from "@/widgets/statistic/chart_bar_custom.tsx";
+import {Spinner} from "@/shared/components/ui/spinner.tsx";
 
 export const UserTopMoviesChart: React.FC = () => {
 	const {user} = useAuth();
 
-	const {data} = $api.useQuery(
+	const {data, isPending} = $api.useQuery(
 		"get",
 		"/statistic/top_films",
 		{
@@ -35,6 +36,10 @@ export const UserTopMoviesChart: React.FC = () => {
 			color: "var(--background)"
 		}
 	};
+
+	if (isPending) {
+		return <Spinner size={"large"} />;
+	}
 
 	return (
 		<ChartBarLabelCustom

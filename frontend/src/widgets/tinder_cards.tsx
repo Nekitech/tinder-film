@@ -10,6 +10,7 @@ import CardCustom from "@/features/card_custom/card_custom.tsx";
 import {components} from "@/shared/api/generated/schema";
 import {Slider} from "@/shared/components/ui/slider.tsx";
 import {Checkbox} from "@/shared/components/ui/checkbox.tsx";
+import {Spinner} from "@/shared/components/ui/spinner.tsx";
 // import { BgPattern } from "@/components/ui";
 
 
@@ -54,7 +55,7 @@ const TinderCards = () => {
 		}
 	)
 
-	const {data} = $api.useQuery(
+	const {data, isPending} = $api.useQuery(
 		"get",
 		"/recommender/recommendations/{user_id}",
 		{
@@ -152,6 +153,10 @@ const TinderCards = () => {
 			transition: {duration: 0.3, ease: easeOutExpo},
 		},
 	};
+
+	if (isPending) {
+		return <Spinner size={"large"} />;
+	}
 
 	return (
 		<motion.div

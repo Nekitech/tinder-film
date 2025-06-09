@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
 	const [user, setUser] = useState<AuthUser | null>(null);
 
-	const {mutateAsync, isPending, status} = $api.useMutation(
+	const {mutateAsync, status: statusLogin} = $api.useMutation(
 		"post",
 		"/login",
 	);
@@ -71,8 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
 		return {
 			userData: userInfo,
-			isPending,
-			status
+			statusLogin
 		}
 	};
 

@@ -6,6 +6,8 @@ import {Button} from "@/shared/components/ui/button";
 import {Input} from "@/shared/components/ui/input";
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
 import {Link, useNavigate} from "@tanstack/react-router";
+import {useState} from "react";
+import {Spinner} from "@/shared/components/ui/spinner.tsx";
 
 const signUpFormSchema = z.object({
 	username: z.string()
@@ -19,6 +21,7 @@ const signUpFormSchema = z.object({
 const SignUpForm = () => {
 	const {sign_up} = useAuth();
 	const navigate = useNavigate()
+	const [isPendingLogin, setIsPendingLogin] = useState(false)
 
 
 	const form = useForm<z.infer<typeof signUpFormSchema>>({
@@ -30,6 +33,7 @@ const SignUpForm = () => {
 	});
 
 	async function onSubmit(values: z.infer<typeof signUpFormSchema>) {
+		setIsPendingLogin(true)
 		try {
 			await sign_up!(values.username, values.password);
 
@@ -40,7 +44,13 @@ const SignUpForm = () => {
 
 		} catch (error) {
 			console.error("Signup failed:", error);
+		} finally {
+			setIsPendingLogin(false)
 		}
+	}
+
+	if (isPendingLogin) {
+		return <Spinner size={"large"} />
 	}
 
 	return (
