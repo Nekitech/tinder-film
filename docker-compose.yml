@@ -5,7 +5,7 @@ services:
     container_name: postgres_db
     restart: always
     ports:
-      - "5433:5432"
+      - "${DB_EXTERNAL_PORT:-5433}:${DB_INTERNAL_PORT:-5432}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
