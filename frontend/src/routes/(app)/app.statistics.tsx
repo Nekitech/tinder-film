@@ -1,5 +1,6 @@
 import {createFileRoute, redirect} from '@tanstack/react-router'
-import {ChartBarLabelCustom} from "@/widgets/statistic/chart_bar_custom.tsx";
+import {UserTopMoviesChart} from "@/widgets/statistic/user_top_movies_chart.tsx";
+import {UserTopGenreChart} from "@/widgets/statistic/user_top_genre_chart.tsx";
 
 export const Route = createFileRoute('/(app)/app/statistics')({
 	component: RouteComponent,
@@ -18,9 +19,10 @@ export const Route = createFileRoute('/(app)/app/statistics')({
 
 function RouteComponent() {
 	return (
-		<>
-			<ChartBarLabelCustom />
-		</>
+		<div className={"flex flex-col gap-4 py-4"}>
+			<UserTopMoviesChart />
+			<UserTopGenreChart />
+		</div>
 
 	)
 }

@@ -19,11 +19,3 @@ async def get_statistic_top_genres(
         statistic_service: StatisticService = Depends(get_statistic_service)
 ):
     return await statistic_service.get_top_genres(user_id)
-
-
-@router.get("/statistic/similar_users", tags=["statistic"])
-async def get_statistic_similar_users(
-        user_id: int,
-        statistic_service: StatisticService = Depends(get_statistic_service)
-):
-    return await statistic_service.get_similar_users(user_id)

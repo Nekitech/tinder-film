@@ -17,7 +17,7 @@ class RecommenderService:
         self.model = None  # Surprise SVD модель
         self.model_storage = model_storage
         self.interactions_repo = interactions_repo
-        self.implicit_service = implicit_service  # Встраиваем ImplicitFeedbackService
+        self.implicit_service = implicit_service
 
     async def train_model(self, limit: int = 1000):
         # Тренируем модель SVD на основе рейтингов
