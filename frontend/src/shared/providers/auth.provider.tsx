@@ -12,30 +12,27 @@ type AuthUser = {
 export type AuthContextType = {
     user: AuthUser | null;
     login?: (username: string, password: string) => Promise<{ userData: any, isPending: any, status: any }>;
+    sign_up?: (username: string, password: string) => Promise<void>;
     logout?: () => void;
     isAuthenticated: (() => boolean) | undefined;
 };
-
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
 	const accessToken = localStorage.getItem('access_token');
-	// const refreshToken = localStorage.getItem('refresh_token');
 
 	const [user, setUser] = useState<AuthUser | null>(null);
+
 	const {mutateAsync, isPending, status} = $api.useMutation(
 		"post",
 		"/login",
-	)
+	);
 
-	// const refreshMutation = $auth_api.refresh.hook({
-	// 	request: {
-	// 		headers: {
-	// 			Authorization: `Bearer ${refreshToken}`,
-	// 		},
-	// 	},
-	// }, queryClient);
+	const {mutateAsync: signUpMutate} = $api.useMutation(
+		"post",
+		"/register",
+	);
 
 	const {data, isSuccess, refetch} = $api.useQuery(
 		"get",
@@ -53,33 +50,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 		}
 	}, [isSuccess, data]);
 
-	// useEffect(() => {
-	// 	async function tryRefresh() {
-	// 		if (!accessToken) {
-	// 			logout();
-	// 			return;
-	// 		}
-	//
-	// 		if (!isSuccess) {
-	// 			if (refreshToken) {
-	// 				try {
-	// 					const refreshed = await refreshMutation.mutateAsync();
-	// 					localStorage.setItem('access_token', refreshed.access_token);
-	//
-	// 					await queryClient.invalidateQueries();
-	// 					await refetch();
-	// 				} catch {
-	// 					logout();
-	// 				}
-	// 			} else {
-	// 				logout();
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	tryRefresh();
-	// }, [isSuccess, accessToken, refreshToken, refreshMutation, queryClient, refetch]);
-
 	const login = async (username: string, password: string) => {
 		const response = await mutateAsync({
 			body: {
@@ -92,8 +62,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 		localStorage.setItem('refresh_token', response.refresh_token!);
 
 		const {data: userInfo} = await refetch();
-
-		console.log(userInfo)
 
 		if (userInfo) {
 			setUser({
@@ -108,6 +76,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 		}
 	};
 
+	const sign_up = async (username: string, password: string) => {
+		try {
+			await signUpMutate({
+				params: {
+					query: {
+						username,
+						password
+					}
+				}
+			});
+
+		} catch (error) {
+			console.error("Signup error:", error);
+			throw error;
+		}
+	}
 
 	const logout = () => {
 		localStorage.removeItem('access_token');
@@ -120,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 	}
 
 	return (
-		<AuthContext.Provider value={{user, isAuthenticated, login, logout}}>
+		<AuthContext.Provider value={{user, isAuthenticated, login, sign_up, logout}}>
 			{ children }
 		</AuthContext.Provider>
 	);
