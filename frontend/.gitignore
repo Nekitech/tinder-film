@@ -27,3 +27,5 @@ src/shared/api/generated/
 
 .env
 .env.*
+
+*.sh
