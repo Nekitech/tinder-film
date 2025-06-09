@@ -8,15 +8,15 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/shared/components/ui/sidebar"
-import {AlignCenterHorizontalIcon, ChartSpline, Home, LogIn} from "lucide-react"
+import {AlignCenterHorizontalIcon, ChartSpline, LogIn} from "lucide-react"
 import {useAuth} from "@/shared/providers/auth.provider.tsx";
 
 const items = [
-	{
-		title: "Home",
-		url: "/app",
-		icon: Home,
-	},
+	// {
+	// 	title: "Home",
+	// 	url: "/app",
+	// 	icon: Home,
+	// },
 	{
 		title: "Recommendations",
 		url: "/app/recommendations",
@@ -38,9 +38,7 @@ const appTitle = "Tinder Film"
 
 export function AppSidebar() {
 	const {logout, user} = useAuth()
-	if (user) {
-		console.log(user)
-	}
+
 	return (
 		<Sidebar>
 			<SidebarContent>

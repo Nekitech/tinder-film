@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlalchemy import Table, Column, Integer, Float, MetaData
+from sqlalchemy import Table, Column, Integer, Float, MetaData, String
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +11,13 @@ ratings_table = Table(
     Column("user_id", Integer, primary_key=True),
     Column("movie_id", Integer, nullable=False),
     Column("rating", Float, nullable=False)
+)
+
+users_table = Table(
+    "users",  # Assuming the table name is 'users'
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("username", String, nullable=True)
 )
 
 
@@ -31,3 +38,25 @@ class SimilarUsersRepository:
         )
         rows = result.fetchall()
         return pd.DataFrame(rows, columns=["user_id", "movie_id", "rating"])
+
+    async def get_usernames_by_ids(self, user_ids: list[int]) -> list[dict[str, object]]:
+        """
+        Получает username для переданных ID пользователей.
+        Если username отсутствует, устанавливается null.
+        :param user_ids: Список ID пользователей.
+        :return: Список словарей с user_id и username.
+        """
+        result = await self.db.execute(
+            select(
+                users_table.c.id.label("user_id"),
+                users_table.c.username
+            ).where(users_table.c.id.in_(user_ids))
+        )
+
+        rows = result.fetchall()
+
+        # Создадим словарь, сопоставляющий user_id с username
+        user_dict = {row.user_id: row.username for row in rows}
+
+        # Вернем список словарей с установленным null для отсутствующих пользователей
+        return [{"user_id": user_id, "username": user_dict.get(user_id)} for user_id in user_ids]

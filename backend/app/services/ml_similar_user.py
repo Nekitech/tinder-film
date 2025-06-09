@@ -1,5 +1,3 @@
-from typing import List
-
 from surprise import Dataset, Reader, KNNBasic
 
 from app.repositories.similar_user_repository import SimilarUsersRepository
@@ -34,8 +32,14 @@ class SimilarUsersService:
     async def load_model(self):
         self.model, self.trainset = self.model_storage.load()
 
-    async def get_similar_users(self, user_id: int, n: int = 5) -> List[int]:
-        print(self.model, self.trainset)
+    async def get_similar_users(self, user_id: int, n: int = 5):
+        """
+        Fetch similar users by user_id and append username if the user exists in the table.
+
+        :param user_id: Target user ID.
+        :param n: Number of similar users to retrieve.
+        :return: List of dictionaries with `user_id` and `username`.
+        """
         if self.model is None or self.trainset is None:
             raise ValueError("Модель не обучена или не загружена.")
 
@@ -44,5 +48,11 @@ class SimilarUsersService:
         except ValueError:
             return []
 
+        # Get similar user IDs
         neighbor_inner_ids = self.model.get_neighbors(inner_id, k=n)
-        return [int(self.trainset.to_raw_uid(inner_id)) for inner_id in neighbor_inner_ids]
+        similar_user_ids = [int(self.trainset.to_raw_uid(inner_id)) for inner_id in neighbor_inner_ids]
+
+        # Fetch usernames from repository
+        similar_users_with_usernames = await self.repo.get_usernames_by_ids(similar_user_ids)
+
+        return similar_users_with_usernames

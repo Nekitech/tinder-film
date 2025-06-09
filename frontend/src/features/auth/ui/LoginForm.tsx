@@ -26,7 +26,7 @@ const LoginForm = () => {
 		if (isAuthenticated?.()) {
 			console.log('auth success')
 			navigate({
-				to: '/app'
+				to: '/app/recommendations'
 			})
 		}
 
