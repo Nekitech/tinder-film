@@ -13,6 +13,8 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:5173",
+    "http://193.23.210.176",
+    "http://193.23.210.176:5173"
 ]
 
 # Подключение CORS middleware

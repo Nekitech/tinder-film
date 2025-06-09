@@ -23,7 +23,7 @@ const LoginForm = () => {
 	async function onSubmit(values: z.infer<typeof loginFormScheme>) {
 		await login!(values.username, values.password)
 
-		if (isAuthenticated()) {
+		if (isAuthenticated?.()) {
 			console.log('auth success')
 			navigate({
 				to: '/app'

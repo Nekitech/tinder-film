@@ -28,7 +28,6 @@ const CardCustom = ({
 	setCardDrivenProps,
 	setIsDragging,
 	isDragging,
-	isLast,
 	setIsDragOffBoundary,
 	setDirection,
 	handleActionBtnOnClick
